@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101715">
+  <meta name="description" content="A machine-learning powered loan status prediction demo.">
+  <title>Loanwise — Loan Status Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Loanwise home">
+      <span class="brand-mark"><span></span><span></span><span></span></span>
+      <span>loanwise<span class="brand-period">.</span></span>
+    </a>
+    <div class="topbar-right">
+      <span class="status-dot"></span><span class="status-text">ML prediction demo</span>
+      <span class="topbar-divider"></span>
+      <span class="model-chip">SVC MODEL</span>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> SMARTER LOAN INSIGHTS</div>
+        <h1>A clearer view of<br><span>your loan outlook.</span></h1>
+        <p class="hero-description">Enter a few applicant details to see what the machine-learning model predicts. Simple inputs, thoughtful insights.</p>
+        <div class="hero-note">
+          <span class="note-icon">✳</span>
+          <span>Designed for clarity. Built with machine learning.</span>
+        </div>
+      </div>
+      <aside class="hero-aside">
+        <div class="aside-orbit orbit-large"></div>
+        <div class="aside-orbit orbit-small"></div>
+        <div class="aside-center">
+          <div class="aside-symbol">↗</div>
+          <span class="aside-kicker">LOAN STATUS</span>
+          <strong>Prediction</strong>
+          <span class="aside-subtitle">Powered by your trained SVC model</span>
+        </div>
+        <div class="floating-tag tag-top"><span class="tag-dot"></span> Applicant profile</div>
+        <div class="floating-tag tag-bottom"><span class="tag-spark">✦</span> Data-led estimate</div>
+      </aside>
+    </section>
+
+    <section class="workspace">
+      <div class="form-panel">
+        <div class="section-heading">
+          <div>
+            <span class="step-label">01 / APPLICANT PROFILE</span>
+            <h2>Tell us about the applicant</h2>
+            <p>Use the information available in the application.</p>
+          </div>
+          <div class="heading-icon">⌘</div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error" role="alert"><span>!</span>{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/" id="loan-form">
+          <div class="form-section-title"><span class="section-number">A</span> Personal details</div>
+          <div class="field-grid three-col">
+            <label class="field">
+              <span>Gender</span>
+              <select name="Gender" required>
+                <option value="" disabled {% if not submitted.get('Gender') %}selected{% endif %}>Select gender</option>
+                <option value="Male" {% if submitted.get('Gender') == 'Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if submitted.get('Gender') == 'Female' %}selected{% endif %}>Female</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Marital status</span>
+              <select name="Married" required>
+                <option value="" disabled {% if not submitted.get('Married') %}selected{% endif %}>Select status</option>
+                <option value="Yes" {% if submitted.get('Married') == 'Yes' %}selected{% endif %}>Married</option>
+                <option value="No" {% if submitted.get('Married') == 'No' %}selected{% endif %}>Single / not married</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Dependents</span>
+              <select name="Dependents" required>
+                <option value="" disabled {% if not submitted.get('Dependents') %}selected{% endif %}>Select count</option>
+                {% for value in ['0', '1', '2', '3+'] %}
+                <option value="{{ value }}" {% if submitted.get('Dependents') == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="field">
+              <span>Education</span>
+              <select name="Education" required>
+                <option value="" disabled {% if not submitted.get('Education') %}selected{% endif %}>Select education</option>
+                <option value="Graduate" {% if submitted.get('Education') == 'Graduate' %}selected{% endif %}>Graduate</option>
+                <option value="Not Graduate" {% if submitted.get('Education') == 'Not Graduate' %}selected{% endif %}>Not graduate</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Self-employed</span>
+              <select name="Self_Employed" required>
+                <option value="" disabled {% if not submitted.get('Self_Employed') %}selected{% endif %}>Select option</option>
+                <option value="No" {% if submitted.get('Self_Employed') == 'No' %}selected{% endif %}>No</option>
+                <option value="Yes" {% if submitted.get('Self_Employed') == 'Yes' %}selected{% endif %}>Yes</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Property area</span>
+              <select name="Property_Area" required>
+                <option value="" disabled {% if not submitted.get('Property_Area') %}selected{% endif %}>Select area</option>
+                <option value="Urban" {% if submitted.get('Property_Area') == 'Urban' %}selected{% endif %}>Urban</option>
+                <option value="Semiurban" {% if submitted.get('Property_Area') == 'Semiurban' %}selected{% endif %}>Semi-urban</option>
+                <option value="Rural" {% if submitted.get('Property_Area') == 'Rural' %}selected{% endif %}>Rural</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-section-title section-spaced"><span class="section-number">B</span> Financial details</div>
+          <div class="field-grid two-col">
+            <label class="field">
+              <span>Applicant income <small>per month / dataset unit</small></span>
+              <div class="input-wrap"><span class="input-prefix">₹</span><input type="number" name="ApplicantIncome" min="0" step="any" placeholder="e.g. 5000" value="{{ submitted.get('ApplicantIncome', '') }}" required></div>
+            </label>
+            <label class="field">
+              <span>Co-applicant income <small>per month / dataset unit</small></span>
+              <div class="input-wrap"><span class="input-prefix">₹</span><input type="number" name="CoapplicantIncome" min="0" step="any" placeholder="e.g. 1800" value="{{ submitted.get('CoapplicantIncome', '') }}" required></div>
+            </label>
+            <label class="field">
+              <span>Loan amount <small>dataset unit</small></span>
+              <div class="input-wrap"><span class="input-prefix">₹</span><input type="number" name="LoanAmount" min="0" step="any" placeholder="e.g. 120" value="{{ submitted.get('LoanAmount', '') }}" required></div>
+            </label>
+            <label class="field">
+              <span>Loan term <small>in months</small></span>
+              <div class="input-wrap"><input type="number" name="Loan_Amount_Term" min="1" step="1" placeholder="e.g. 360" value="{{ submitted.get('Loan_Amount_Term', '') }}" required><span class="input-suffix">months</span></div>
+            </label>
+          </div>
+
+          <div class="credit-card">
+            <div class="credit-copy">
+              <span class="credit-label">CREDIT HISTORY</span>
+              <strong>Has credit history?</strong>
+              <p>Choose the value matching the dataset: 1 = yes, 0 = no.</p>
+            </div>
+            <div class="credit-options">
+              <label class="credit-option">
+                <input type="radio" name="Credit_History" value="1" {% if submitted.get('Credit_History', '1') == '1' %}checked{% endif %} required>
+                <span class="radio-ui"></span><span>Yes</span>
+              </label>
+              <label class="credit-option">
+                <input type="radio" name="Credit_History" value="0" {% if submitted.get('Credit_History') == '0' %}checked{% endif %} required>
+                <span class="radio-ui"></span><span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <p><span class="lock-icon">⌑</span> Your inputs are used to generate this prediction only.</p>
+            <button class="submit-button" type="submit"><span>Generate prediction</span><span class="button-arrow">↗</span></button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="result-panel" id="result">
+        {% if result %}
+        <div class="result-content">
+          <div class="result-topline"><span class="result-badge {% if result.approved %}approved{% else %}declined{% endif %}"><span class="result-dot"></span> PREDICTION READY</span><span class="result-index">02</span></div>
+          <div class="result-illustration {% if result.approved %}positive{% else %}negative{% endif %}">
+            <div class="result-ring ring-one"></div><div class="result-ring ring-two"></div>
+            <div class="result-check">{% if result.approved %}✓{% else %}↗{% endif %}</div>
+          </div>
+          <span class="result-overline">MODEL OUTPUT</span>
+          <h2>{{ result.label }}</h2>
+          <p class="result-detail">{{ result.detail }}</p>
+          <div class="result-divider"></div>
+          <div class="result-meta"><span>Algorithm</span><strong>Support Vector Machine</strong></div>
+          <div class="result-meta"><span>Preprocessing</span><strong>StandardScaler</strong></div>
+          <div class="result-meta"><span>Output type</span><strong>Classification</strong></div>
+          <div class="result-disclaimer">This is a machine-learning estimate, not a financial decision or a guarantee of loan approval.</div>
+          <button type="button" class="reset-button" id="edit-inputs">← Edit applicant details</button>
+        </div>
+        {% else %}
+        <div class="empty-result">
+          <div class="result-topline"><span class="result-badge"><span class="result-dot"></span> READY WHEN YOU ARE</span><span class="result-index">02</span></div>
+          <div class="empty-art">
+            <div class="art-grid"></div>
+            <div class="art-card art-card-back"></div>
+            <div class="art-card art-card-front">
+              <div class="mini-card-top"><span>LOAN PROFILE</span><span>•••</span></div>
+              <div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="mini-card-bottom"><span></span><span></span></div>
+            </div>
+            <div class="art-orb"></div>
+            <div class="art-star star-a">✳</div><div class="art-star star-b">✦</div>
+          </div>
+          <span class="result-overline">YOUR RESULT WILL APPEAR HERE</span>
+          <h2>Insight starts<br>with good inputs.</h2>
+          <p class="result-detail">Complete the applicant profile and run the model to see its predicted loan status.</p>
+          <div class="result-divider"></div>
+          <div class="how-row"><span class="how-number">01</span><span>Complete the form</span><span class="how-line"></span><span class="how-icon">↙</span></div>
+          <div class="how-row"><span class="how-number">02</span><span>Run the prediction</span><span class="how-line"></span><span class="how-icon">↗</span></div>
+          <div class="how-row"><span class="how-number">03</span><span>Review the model output</span><span class="how-line"></span><span class="how-icon">✦</span></div>
+          <div class="result-disclaimer">For learning and demonstration purposes only. Not financial advice.</div>
+        </div>
+        {% endif %}
+      </aside>
+    </section>
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="/"><span class="brand-mark"><span></span><span></span><span></span></span><span>loanwise<span class="brand-period">.</span></span></a>
+      <span>Built with Python, Flask & machine learning</span>
+      <span class="footer-right">A portfolio project <span>✳</span></span>
+    </footer>
+  </main>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
